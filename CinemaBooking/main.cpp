@@ -200,3 +200,45 @@ public:
         }
     }
 };
+int main() {
+    BookingSystem system;
+
+    Cinema cinema("Dream Cinemas");
+    Movie movie("Inception", "English", "Sci-Fi", "2010-07-16");
+    Show morningShow(1, "Inception", 15);
+    Show eveningShow(2, "Inception", 15);
+
+    movie.addShow(morningShow);
+    movie.addShow(eveningShow);
+    cinema.addMovie(movie);
+    system.addCinema(cinema);
+
+    cout << "\nWelcome to the Booking System!\n";
+
+    // ѕоказываем доступные кинотеатры и фильмы
+    cinema.displayMovies();
+
+    string movieTitle;
+    cout << "\nEnter the movie you want to watch: ";
+    getline(cin >> ws, movieTitle); // ws чтобы убрать лишние пробелы
+
+    system.searchMovie(movieTitle);
+
+    int showId;
+    cout << "Enter the show ID you want to attend (e.g., 1 or 2): ";
+    cin >> showId;
+
+    int seatNumber;
+    cout << "Enter the seat number you want to book: ";
+    cin >> seatNumber;
+
+    system.bookSeat("Dream Cinemas", movieTitle, showId, seatNumber);
+
+    PaymentSystem::processPayment();
+
+    cout << "\nFinal Seat Status:\n";
+    cinema.movies[movieTitle].shows[showId - 1].displaySeats();
+
+    return 0;
+}
+
