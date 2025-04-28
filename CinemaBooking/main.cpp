@@ -2,12 +2,12 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
-
 enum SeatType { SILVER, GOLD, PLATINUM };
-
 
 struct Seat {
     int seatNumber;
@@ -16,7 +16,6 @@ struct Seat {
 
     Seat(int number, SeatType seatType) : seatNumber(number), isBooked(false), type(seatType) {}
 };
-
 
 struct Show {
     int showId;
@@ -54,7 +53,6 @@ struct Show {
     }
 };
 
-
 struct Movie {
     string title;
     string language;
@@ -70,7 +68,6 @@ struct Movie {
         shows.push_back(show);
     }
 };
-
 
 struct Cinema {
     string name;
@@ -90,7 +87,6 @@ struct Cinema {
     }
 };
 
-// Booking System
 class BookingSystem {
 private:
     vector<Cinema> cinemas;
@@ -121,6 +117,7 @@ public:
                             return;
                         }
                         else {
+                            cout << "Booking failed.\n";
                             return;
                         }
                     }
@@ -131,51 +128,6 @@ public:
     }
 };
 
-int main() {
-    BookingSystem system;
-
-    
-    Cinema cinema("Dream Cinemas");
-
-    Movie movie("Inception", "English", "Sci-Fi", "2010-07-16");
-
-    Show morningShow(1, "Inception", 15);
-    Show eveningShow(2, "Inception", 15);
-
-    movie.addShow(morningShow);
-    movie.addShow(eveningShow);
-
-    
-    cinema.addMovie(movie);
-
-    
-    system.addCinema(cinema);
-
-    
-    cinema.displayMovies();
-    system.searchMovie("Inception");
-
-    
-    string cinemaName, movieTitle;
-    int showId, seatNumber;
-
-    cout << "Enter Cinema name: ";
-    cin >> cinemaName;
-
-    cout << "Enter Movie title: ";
-    cin >> movieTitle;
-
-    cout << "Enter Show ID: ";
-    cin >> showId;
-
-    cout << "Enter Seat number: ";
-    cin >> seatNumber;
-
-    system.bookSeat(cinemaName, movieTitle, showId, seatNumber);
-    cinema.movies["Inception"].shows[0].displaySeats();
-
-    return 0;
-}
 class PaymentSystem {
 public:
     static void processPayment() {
@@ -200,9 +152,9 @@ public:
         }
     }
 };
+
 int main() {
     BookingSystem system;
-
     Cinema cinema("Dream Cinemas");
     Movie movie("Inception", "English", "Sci-Fi", "2010-07-16");
     Show morningShow(1, "Inception", 15);
@@ -214,13 +166,11 @@ int main() {
     system.addCinema(cinema);
 
     cout << "\nWelcome to the Booking System!\n";
-
-    // ѕоказываем доступные кинотеатры и фильмы
     cinema.displayMovies();
 
     string movieTitle;
     cout << "\nEnter the movie you want to watch: ";
-    getline(cin >> ws, movieTitle); // ws чтобы убрать лишние пробелы
+    getline(cin >> ws, movieTitle);
 
     system.searchMovie(movieTitle);
 
@@ -232,12 +182,40 @@ int main() {
     cout << "Enter the seat number you want to book: ";
     cin >> seatNumber;
 
-    system.bookSeat("Dream Cinemas", movieTitle, showId, seatNumber);
+    string confirmation;
+    cout << "\nConfirm booking within 15 seconds (Y/N): ";
 
-    PaymentSystem::processPayment();
+    auto start = chrono::steady_clock::now();
+    bool inputReceived = false;
 
-    cout << "\nFinal Seat Status:\n";
-    cinema.movies[movieTitle].shows[showId - 1].displaySeats();
+    thread inputThread([&]() {
+        getline(cin >> ws, confirmation);
+        inputReceived = true;
+        });
+
+    while (!inputReceived) {
+        auto now = chrono::steady_clock::now();
+        auto elapsed = chrono::duration_cast<chrono::seconds>(now - start).count();
+        if (elapsed > 15) {
+            cout << "\nTime exceeded! Booking cancelled.\n";
+            inputThread.detach();
+            return 0;
+        }
+        this_thread::sleep_for(chrono::milliseconds(100));
+    }
+
+    inputThread.join();
+
+    if (confirmation == "Y" || confirmation == "y") {
+        system.bookSeat("Dream Cinemas", movieTitle, showId, seatNumber);
+        PaymentSystem::processPayment();
+
+        cout << "\nFinal Seat Status:\n";
+        cinema.movies[movieTitle].shows[showId - 1].displaySeats();
+    }
+    else {
+        cout << "\nBooking cancelled by user.\n";
+    }
 
     return 0;
 }
