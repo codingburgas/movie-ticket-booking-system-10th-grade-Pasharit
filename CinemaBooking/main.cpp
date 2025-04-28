@@ -176,3 +176,27 @@ int main() {
 
     return 0;
 }
+class PaymentSystem {
+public:
+    static void processPayment() {
+        cout << "\nChoose Payment Method:\n";
+        cout << "1. Cash\n";
+        cout << "2. Credit Card\n";
+        cout << "Enter option (1 or 2): ";
+        int option;
+        cin >> option;
+
+        switch (option) {
+        case 1:
+            cout << "Payment successful by Cash.\n";
+            break;
+        case 2:
+            cout << "Processing Credit Card payment...\n";
+            cout << "Payment successful by Card.\n";
+            break;
+        default:
+            cout << "Invalid payment option.\n";
+            break;
+        }
+    }
+};
