@@ -155,6 +155,26 @@ public:
 
 int main() {
     BookingSystem system;
+    UserManager userManager;
+    cout << "\nWelcome to the Booking System!\n";
+
+    cout << "Do you have an account? (Y/N): ";
+    char hasAccount;
+    cin >> hasAccount;
+
+    if (hasAccount == 'Y' || hasAccount == 'y') {
+        if (!userManager.loginUser()) {
+            cout << "Exiting...\n";
+            return 0;
+        }
+    }
+    else {
+        userManager.registerUser();
+        if (!userManager.loginUser()) {
+            cout << "Exiting...\n";
+            return 0;
+        }
+    }
     Cinema cinema("Dream Cinemas");
     Movie movie("Inception", "English", "Sci-Fi", "2010-07-16");
     Show morningShow(1, "Inception", 15);
